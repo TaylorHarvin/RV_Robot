@@ -1,0 +1,44 @@
+// From LTL 5 
+// 5.
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import soccerPlayers.*;
+import soccerControllers.*;
+AlwaysIR(SensorController SC) {
+	SensorController currSC = null; // Allows for usage of SC in the ltl violation
+	
+	
+	event turntoball before(Kicker MK):
+		call(public boolean Kicker.TurnToBall()) && target(MK){
+			System.out.println("Before Turn EVENT");
+	}
+	
+	// Handle for the turntoball event
+	event ir_read_true after(SensorController SC) 	returning(boolean res):
+		call(public boolean SensorController.GetIR(int,float[])) && condition(res) && target(SC){
+			currSC = SC;
+			System.out.println("IR read TRUE EVENT");
+	}
+	
+	event ir_read_false after(SensorController SC) returning(boolean res):
+		call(public boolean SensorController.GetIR(int,float[])) && condition(!res) && target(SC){
+			currSC = SC;
+			System.out.println("IR read FALSE EVENT");
+	}
+	
+	ltl: [](turntoball => [] ir_read_true)
+	@violation {
+		System.out.println("!!!IR Read Fail LTL FAIL!!!");
+		System.out.println("Flush IR");
+		float[] tmpIR;
+		// Try to rest IR -- Loop forever if IR is in complete fail
+		while(currSC.GetIR(Globals.IR_MOD,tmpIR)){	
+			currSC.FlushSensors();
+			System.out.println("Flush IR Loop");
+		}
+		// DO A DEFAULT 30 degree TURN for Find
+		__RESET;
+	}
+}

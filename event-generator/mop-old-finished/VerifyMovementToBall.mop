@@ -1,0 +1,39 @@
+// From LTL 6 -- intended to be used with around advice
+// NOTE: Check difference in movement from the beginning of goToBall() and the end of goToBall()
+// Ball found => robot starts moving to it.
+// NOTE:  LOGIC MIGHT BE A LITTLE FLAWED IN THIS ONE IN: --LTL--
+
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+VerifyMovementToBall(GeneralPlayer GP) {
+	
+		
+	event goingToBall after(GeneralPlayer GP) returning (boolean res):
+		call(public ** goToBall()) && condition(res) && target(GP){
+			if(GP.roboMotor.isMoving())
+				return true;
+			else
+				return false;
+		}
+		
+	// Verify that the motors are moving after a call to gotoBall
+	ltl: [](goingToBall)
+	@violation { 
+		System.out.println("Motor Failure for gotoBall!");
+		System.out.println("Trying to force motors to move");
+		
+		while(!GP.roboMotor.isMoving()){
+			GP.roboMotor.getMoveController().setLinearSpeed(10);
+			GP.roboMotor.getMoveController().forward();
+		}
+	}
+
+}
+
+

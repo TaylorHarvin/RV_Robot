@@ -1,0 +1,38 @@
+// From LTL 2 -- intended to be used with after advice
+// Verify that a network connection exists between the client and the server robots at all times
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+BaseConn(GeneralPlayer GP) {
+	
+	
+	// NOTE -- isConnected() is a new method in the BotCommunicator class (not provided in earlier versions)
+	// It simply checks the connection between the robots
+	event botsConnected after(GeneralPlayer GP) returning (boolean res):
+		call(public boolean* BotCommunicator.isConnected()) && condition(res) && target(GP){}
+
+	// Attempt to recover from network communication failure
+	// between the two robots
+	ltl: [](botsConnected)
+	@violation { 
+		System.out.println("Bot network communication failed!");
+		System.out.println("Trying to Recover!");
+		int countTry = 1;
+		
+		// Handle Bot Connection Failure
+		while(!GP.botComm.isConnected())){
+			System.out.println("Comm Recover Try: "+countTry);
+			GP.botComm.setSocketType(GP.isServer);
+			countTry++;
+		}
+		GP.goalFinder.gotoGoal();
+	}
+
+}
+

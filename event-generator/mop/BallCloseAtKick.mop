@@ -1,0 +1,42 @@
+// From LTL 7 
+// 7.
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import soccerPlayers.*;
+import soccerControllers.*;
+
+BallCloseAtKick(Kicker MK) {
+	Kicker currMK = null;
+	event kickball_before before(Kicker MK):
+		call(public boolean Kicker.GotoBall()) && target(MK){
+			currMK = MK;
+			System.out.println("Kick Ball TRUE EVENT");
+	}
+
+	event ballclose_true after(Kicker MK) returning(boolean res):
+		call(public boolean Kicker.BallClose()) && condition(res) && target(MK){
+			currMK = MK;
+			System.out.println("Ball Close TRUE EVENT");
+	}
+	event ballclose_false after(Kicker MK) returning(boolean res):
+		call(public boolean Kicker.BallClose()) && condition(!res) && target(MK){
+			currMK = MK;
+			System.out.println("Ball Close FALSE EVENT");
+	}
+	ltl: [](kickball_before => (*) ballclose_true)
+	@violation{
+		System.out.println("!!!BallCloseAtKick LTL Violated!!!");
+		while(!currMK.FindBall()){
+			System.out.println("Re-attempt Find Ball");
+		}
+		// NEED GOTO GOAL
+		__RESET;
+	}
+}
+
+
+
+

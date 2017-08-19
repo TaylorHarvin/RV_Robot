@@ -1,0 +1,44 @@
+// From LTL 7 -- intended to be used with after advice
+// Stop motor movement when sonar < BALL_SONAR_DIST_GRAB or sonar is high and !(modInFront || unModInFront)
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+StopAtBall(GeneralPlayer GP) {
+	
+	event goToBall around(GeneralPlayer GP):
+		call(public boolean goToBall())&& target(GP){
+			// Verify that the motors are not moving if the ball is in grabbing range
+			if(GP.ballFinder.ballInFront()){
+				System.out.println("Halting motors -- ball in front");
+				GP.roboMotor.getMoveController().stop();
+				if(GP.roboMotor.isMoving()){
+					System.out.println("Halting motors FAILED!");
+				}
+				else{
+					System.out.println("Halting motors SUCCESS!");
+				}
+			}
+		}
+	event turnToBall around(GeneralPlayer GP):
+		call(public boolean goToBall())&& target(GP){
+			// Verify that the motors are not moving if the ball is in grabbing range
+			System.out.println("Halting motors -- ball in front");
+			GP.roboMotor.getMoveController().stop();
+			if(GP.roboMotor.isMoving()){
+				System.out.println("Halting motors FAILED!");
+			}
+			else{
+				System.out.println("Halting motors SUCCESS!");
+			}
+		}
+	
+	/*ltl: [](goToGoal => (*) ballinfronttrue)
+	@violation { 
+	}*/
+
+}

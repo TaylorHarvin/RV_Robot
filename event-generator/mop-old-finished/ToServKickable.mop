@@ -1,0 +1,41 @@
+// From LTL 11 -- intended to be used with after advice
+// Pass only if it has the server's coordinates
+// float[] otherBotPos in GeneralPlayer are the values to check for validity
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+// NOTE:  Might be partly redundant with ServCoordReceived
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+ToServKickable(GeneralPlayer GP) {
+	
+	// Verify that the client has the server's coordinates before passing
+	event hasValidCoordBeforePass before(GeneralPlayer GP):
+		call(public void * kickBall())&& target(GP){
+			boolean invalidCoordFlag = false;
+			if(!GP.botComm.isServer()){
+				if(GP.otherBotPos[0] < 0 || GP.otherBotPos[0] > 300){
+					System.out.println("Invalid client x coord from server.");
+					invalidCoordFlag = true;
+				}
+				if(GP.otherBotPos[1] < 0 || GP.otherBotPos[1] > 100){
+					System.out.println("Invalid client y coord from server.");
+					invalidCoordFlag = true;
+				}
+				// Invalid coordinates received, try again
+				if(invalidCoordFlag)
+					GP.otherBotPos = GP.botComm.getBotPos();
+			}
+		}
+		
+
+	/*ltl: [](goToGoal => (*) ballinfronttrue)
+	@violation { 
+	}*/
+
+}
+

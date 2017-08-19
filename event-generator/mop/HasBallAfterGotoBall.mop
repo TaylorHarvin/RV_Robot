@@ -1,0 +1,47 @@
+// From LTL 7 
+// 7.
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import playerControllers.*;
+import sensorControllers.*;
+
+HasBallAfterGotoBall(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of SK in the ltl violation
+	event gotoball after(Kicker MK):
+		call(public boolean Kicker.GotoBall()) && target(MK){
+			currMK = MK;
+			System.out.println("Goto Ball TRUE EVENT");
+	}
+			
+	event gotoball_false after(Kicker MK) returning(boolean res):
+		call(public boolean Kicker.GotoBall()) && condition(!res) && target(MK){
+			currMK = MK;
+			System.out.println("Goto Ball FALSE EVENT");
+	}
+	
+	event hasball_true after(Kicker MK) returning(boolean res):
+		call(public boolean Kicker.HasBall()) && condition(res) && target(MK){
+			currMK = MK;
+			System.out.println("HasBall TRUE EVENT");
+	}
+	
+	event hasball_false after(Kicker MK) returning(boolean res):
+		call(public boolean Kicker.HasBall()) && condition(!res) && target(MK){
+			currMK = MK;
+			System.out.println("HasBall FALSE EVENT");
+	}
+
+	ltl: [](gotoball_true =>o hasball_true)
+	@violation {
+		MotorController MC = currKicker.GetMotorController();
+		MC.Stop();
+		currMK.GotoGoal(true);
+		__RESET;
+	}
+}
+
+
+

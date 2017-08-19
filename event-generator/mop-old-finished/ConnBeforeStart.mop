@@ -1,0 +1,55 @@
+/**** Communication Property****/
+// From LTL 1 -- intended to be used with before advice
+// Verify that a connection between the two robots is established before
+// performing any action
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+ConnBeforeStart(GeneralPlayer GP) {
+	
+	event start before(GeneralPlayer GP):
+		call(public ** start())&& target(GP){}
+		
+	event connEstablished after(GeneralPlayer GP) returning (boolean res):
+		call(public ** setSocketType(boolean)) && condition(res) && target(GP){
+			boolean connStat = false;
+			if(GP.botComm.isServer){
+				connStat = GP.botComm.clientSocket.isConnected();
+			}
+			else{
+				connStat = GP.botComm.servSocket.isConnected(); 
+			}
+			System.out.println("Server-Client Connection Status: "+connStat);
+			return connStat;
+		}
+	// Verify that the connection is established between the client and the server
+	// before starting -- connection setup in GP constructor
+	ltl: [](start => (*) connEstablished)
+	@violation { 
+		System.out.println("Server-Client connection ltl violated!");
+		final int MAX_CONN_TRY = 4;		// Number of client-server conn tries
+		int tryCount = 1;				// Base try count
+		boolean connStat = false;		// Current connection status 
+		
+		// Handle Server-Client connection ltl violation
+		while(tryCount < MAX_CONN_TRY && !connStat){
+			System.out.println("Connection re-try: "+tryCount);
+			GP.botComm.setSocketType(GP.botComm.isServer);
+			if(GP.botComm.isServer){
+				connStat = GP.botComm.clientSocket.isConnected();
+			}
+			else{
+				connStat = GP.botComm.servSocket.isConnected(); 
+			}
+			System.out.println("Server-Client Connection Status: "+connStat);
+			tryCount++;
+		}
+
+	}
+
+}

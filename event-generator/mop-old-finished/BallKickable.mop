@@ -1,0 +1,51 @@
+// From LTL 10 -- intended to be used with before advice
+// Verify that the robot has the ball before the kick
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+BallKickable(GeneralPlayer GP) {
+	
+	event kicking before(GeneralPlayer GP):
+		call(public void kickBall())&& target(GP){}
+		
+	event prePass after(GeneralPlayer GP) returning (boolean res):
+		call(public void turnToPlayer(float,float)) && condition(res) && target(GP){
+			System.out.println("About to pass.");
+			return true;
+		}
+		
+	event preGoalKick after(GeneralPlayer GP) returning (boolean res):
+		call(public void gotoGoal()) && target(GP) && condition(!res){
+			System.out.println("About to kick to the goal.");
+			return true;
+		}
+	
+	// The ball must be in front of the robot for a kick (for pass or goal kick)
+	ltl: [](kicking => (*) (prePass || preGoalKick))
+	@violation { 
+		//float[] otherBotPos = new float[2];	// received robot pos
+		//float xPosOffset;	// Init robot x pos -- on start
+		//float yPosOffset;	// Init robot y pos -- on start
+		
+		System.out.println("Ball kickable violation!");
+		
+		// Handle Ball kickable violation
+		while(!GP.ballFinder.ballInFront()){
+			GP.ballFinder.turnToBall(false);
+			if(GP.ballFinder.goToBall()){
+				GP.ballFinder.grabBall();
+			}
+		}
+		// !!! NEED CHANGE -- Check event triggered to try again
+		// Not sure about how to grab the event triggered here
+		//GP.goalFinder.gotoGoal();
+		//GP.ballFinder.turnToPlayer(GP.otherBotPos[0]-GP.xPosOffset, GP.otherBotPos[1]-GP.yPosOffset);
+		
+	}
+
+}

@@ -1,0 +1,45 @@
+// From LTL 5 -- intended to be used with after advice
+// ball is in front when ball is found
+// Check BallFinder.ballInFront() in the advice
+
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+BallInFront(GeneralPlayer GP) {
+	
+	/*event ballInFront after(GeneralPlayer GP) returning (boolean res):
+		BallFinder.ballInFront() && condition(res){}*/
+	
+	event grabball before(GeneralPlayer GP):
+		call(public ** grabBall())&& target(GP){}
+		
+	event ballinfronttrue after(GeneralPlayer GP) returning (boolean res):
+		call(public ** goToBall()) && condition(res) && target(GP){
+			System.out.println("Ball in front true");
+		}
+		
+	event ballinfrontfalse after(GeneralPlayer GP) returning (boolean res):
+		call(public ** goToBall()) && target(GP) && condition(!res){
+			System.out.println("Ball in front false");
+		}
+
+	ltl: [](grabball => (*) ballinfronttrue)
+	@violation { 
+		System.out.println("Ball find ltl violated!");
+		
+		// Handle Ball In Front violation
+		while(!GP.ballFinder.ballInFront()){
+			GP.ballFinder.turnToBall(false);
+			if(GP.ballFinder.goToBall()){
+				GP.ballFinder.grabBall();
+			}
+		}
+	}
+
+}
+

@@ -1,0 +1,39 @@
+// From LTL 3 -- intended to be used with after advice
+// When waiting for a message, the robot will receive it.
+// Two possible messages: PASSED or <float>,<float>
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+MessageReceived(GeneralPlayer GP) {
+	
+	event goToGoal after(GeneralPlayer GP):
+		call(public String receiveMessage())&& target(GP){
+			int receiveTry = 1;	// message receive try count
+			int MAX_TRY = 4;
+			
+			// Verify that the message has valid info
+			// Note -- this just checks that something is received
+			// 		   it might still be incorrect data
+			while(receiveTry < MAX_TRY){
+				System.out.println("Get Message Try: "+receiveTry);
+				if(dataInput.available() > 0){
+					System.out.println("Message Received");
+				}
+				else{
+					System.out.println("Message Not Received");
+				}
+				receiveTry++;
+			}
+		}
+
+	/*ltl: [](goToGoal => (*) ballinfronttrue)
+	@violation { 
+		
+	}*/
+
+}

@@ -1,0 +1,53 @@
+// From LTL 2 
+// 2.
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import soccerPlayers.*;
+import soccerControllers.*;
+
+BallInFrontAfterTurnUntilKick(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of MK in the ltl violation
+
+	// Handle for the turntoball event
+	event turntoball_true after(Kicker MK) returning(boolean res):
+		call(public boolean TurnToBall()) && condition(res) && target(MK){
+		currMK = MK;
+		System.out.println("Turn to Ball TRUE EVENT");
+	}
+	
+	event turntoball_false after(Kicker MK) returning(boolean res):
+		call(public boolean TurnToBall()) && condition(!res) && target(MK){
+		currMK = MK;
+		System.out.println("Turn to Ball FALSE EVENT");
+	}
+	
+	// Handle for the ball in front event
+	event ballinfront_true after(Kicker MK) returning (boolean res):
+		call(public boolean Kicker.BallInFront()) && condition(res) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT Ball in front: "+ res);
+	}
+	
+	// Handle for the ball in front event
+	event ballinfront_false after(Kicker MK) returning (boolean res):
+		call(public boolean Kicker.BallInFront()) && condition(!res) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT Ball in front: "+ res);
+	}
+	event afterkick after(Kicker MK):
+		call(public void Kicker.KickBall()) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT After Kick");
+	}
+	
+	ltl: [](turntoball_true => (ballinfront_true U afterkick))
+	@violation {
+		System.out.println("!!!BallInFrontBetweenTurnAndKick LTL FAIL!!!");
+		System.out.println("Re-Attempting FindAndGrabBall");
+		currMK.FindBall();
+		__RESET;
+	}
+}

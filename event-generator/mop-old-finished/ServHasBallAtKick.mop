@@ -1,0 +1,45 @@
+// From LTL 15 -- intended to be used with after advice
+// Verify ball grabbed by the server after client passes
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+// NOTE:  This may need to be renamed to make it more clear
+ServHasBallAtKick(GeneralPlayer GP) {
+	
+	event servPosSent before(GeneralPlayer GP):
+		call(public void sendPosition(float, float))&& target(GP){
+			if(GP.botComm.isServer())
+				System.out.println("Server sent coord to client\n Waiting on pass.");
+		}
+		
+	event passTrue after(GeneralPlayer GP) returning (boolean res):
+		call(public boolean passConfirmed()) && condition(res) && target(GP){
+			System.out.println("Ball passed by client");
+		}
+		
+	event passFalse after(GeneralPlayer GP) returning (boolean res):
+		call(public boolean passConfirmed()) && condition(res) && target(GP){
+			System.out.println("Client failed to pass ball.");
+		}
+
+	ltl: [](servPosSent => (*) passTrue)
+	@violation { 
+		System.out.println("Pass to server violated!");
+		
+		// Assume that the client sent the ball, but network comm failed
+		// the only thing that the server can do at this point is search
+		// for the ball itself
+		
+		ballFinder.turnToBall(false);
+		while(!ballFinder.goToBall()){
+			ballFinder.turnToBall(false);
+			System.out.println("Goto Ball");
+		}
+	}
+
+}

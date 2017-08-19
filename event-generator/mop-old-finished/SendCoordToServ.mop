@@ -1,0 +1,50 @@
+// From LTL 12 -- intended to be used with after advice
+// Client sends its position to the server after it grabs the ball
+// NOTE:  MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+// CHECK FOR SERVER/CLIENT SEPARATION
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;
+import lejos.robotics.navigation.Navigator;
+
+SendCoordToServ(GeneralPlayer GP) {
+	
+	event grabBall after(GeneralPlayer GP):
+		call(public void grabBall())&& target(GP){
+			System.out.println("Grabbing Ball");
+		}
+		
+	event sendingCoord after(GeneralPlayer GP) returning (boolean res):
+		call(public void sendPosition(float, float)) && args(x, y) && target(GP){
+			// If it is the client -- send pos event
+			if(!GP.botComm.isServer()){
+				System.out.println("client sending position");
+				// Verify that coordinates are valid
+				if(x < 0 || x > 300)
+					System.out.println("Invalid client x coord.");
+				if(y < 0 || y > 100)
+					System.out.println("Invalid client y coord.");
+			}
+		}
+		
+	// Client Only -- send coordinates to the server after grabbing the ball
+	ltl: [](grabBall => (*) sendingCoord)
+	@violation {
+		if(!GP.botComm.isServer())
+			int tryCount = 1;
+			int MAX_TRIES = 4;
+			System.out.println("Sending Coord to Serv ltl violated!");
+			
+			// Handle Sending Coord violation
+			while(tryCount < MAX_TRIES && !botComm.passConfirmed()){
+				System.out.println("Sending Coord to Serv try: " +tryCount);
+				botComm.sendPosition(GP.roboPos.getPose().getX()+GP.xPosOffset, GP.roboPos.getPose().getY()+GP.yPosOffset);
+				tryCount++;
+			}
+		}
+	}
+
+	
+}

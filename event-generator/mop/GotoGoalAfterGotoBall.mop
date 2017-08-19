@@ -1,0 +1,40 @@
+// From LTL 1 
+// 1. Ball is in front of the robot after goto ball
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import soccerPlayers.*;
+import soccerControllers.*;
+
+GotoGoalAfterGotoBall(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of MK in the ltl violation
+	
+	// Handle for the turntoball event
+	event gotoball_true after(Kicker MK) returning(boolean res):
+		call(public boolean Kicker.GotoBall()) && condition(res) && target(MK){
+		currMK = MK;
+		System.out.println("Go to Ball EVENT");
+	}
+	
+	event gotoball_false after(Kicker MK) returning(boolean res):
+		call(public boolean GotoBall()) && condition(!res) && target(MK){
+			currMK = MK;
+			System.out.println("Go to Ball EVENT");
+		}
+		
+	event beforegotogoal before(Kicker MK):
+		call(public void Kicker.GotoGoal(boolean)) && this(MK){
+		currMK = MK;
+		System.out.println("EVENT Before Goto Goal");
+	}
+
+	ltl: [](gotoball_true => o beforegotogoal)
+	@violation {
+		System.out.println("!!!Goto Goal LTL FAIL!!!");
+		System.out.println("Attempting GotoGoal");
+		currMK.GotoGoal(true);
+		__RESET;
+	}
+}

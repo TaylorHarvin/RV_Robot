@@ -1,0 +1,45 @@
+// From LTL 15 -- intended to be used with after advice
+// Verify that the server robot grabbed the ball (after the passed message was received)
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import FullSoccer.*;		// For lego soccer classes
+import lejos.robotics.navigation.Navigator;
+
+BallGrabbedServ(GeneralPlayer GP) {
+	
+	
+	// The ball is in front and the server robot is about to grab it.
+	event grabbingBall before(GeneralPlayer GP):
+		call(public ** gotoGoal())&& target(GP){}
+	
+	// The ball was grabbed by the server
+	event ballGrabbed after(GeneralPlayer GP) returning (boolean res):
+		call(public void * grabBall()) && condition(res) && target(GP){
+			if(GP.isServer){
+				if(GP.ballFinder.ballInFront){
+					System.out.println("Ball grabbed by server robot!");
+					return true;
+				}
+				else{
+					System.out.println("Ball NOT grabbed by server robot!");
+					return false
+				}
+			}
+		}
+		
+	
+	
+	// Check if the ball was actually grabbed by the server
+	// Ball should be triggered as "In Front" if the server robot has the ball
+	ltl: [](grabbingBall => (*) ballGrabbed)
+	@violation { 
+		if(GP.isServer)
+				System.out.println("Ball Grab LTL (server) VIOLATED!");
+	}
+
+}
+

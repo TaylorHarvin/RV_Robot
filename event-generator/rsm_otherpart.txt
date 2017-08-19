@@ -1,0 +1,72 @@
+//***************SENSOR SETUPS************************
+	// Sonar sensor setup
+	//pointcut sonarSensorSetup(Kicker MK) : cflowbelow(playPC(MK)) && set(EV3UltrasonicSensor SensorController.sonarSensor);
+	//after(Kicker MK):sonarSensorSetup(MK){}
+	
+	
+	
+	// IR sensor setup
+	//pointcut irSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicIRSeekerV2 SensorController.irSensor);
+	//after(Kicker MK):irSensorSetup(MK){}
+	
+	
+	// Compass sensor setup
+	//pointcut compassSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicCompass SensorController.compassSensor);
+	//after(Kicker MK):compassSensorSetup(MK){
+		
+	//}
+	
+	
+	
+	//***************SAMPLE SETUPS************************
+	
+	
+	// IR Mod sampler and IR Un-Mod sampler
+	pointcut irSeekModeModSetup(Kicker MK):cflowbelow(playPC(MK)) && set(SampleProvider[] SensorController.irSP);
+	after(Kicker MK):irSeekModeModSetup(MK){
+		System.out.println("!!!IR SampleProvider - MOD!!!");
+		//PrintState(MK.GetState());
+	}
+	
+	
+	//***************MOTOR SETUPS*************************
+	// Arm setup
+	pointcut armSetup(Kicker MK):cflowbelow(playPC(MK)) && set(UnregulatedMotor MotorController.arm);
+	after(Kicker MK):armSetup(MK){
+		System.out.println("!!!ARM Setup!!!");
+		//PrintState(MK.GetState());
+	}
+	
+	
+	
+	// Left motor setup
+	pointcut leftMotorSetup(Kicker MK):cflowbelow(playPC(MK)) && set(EV3LargeRegulatedMotor MotorController.leftMotor);
+	after(Kicker MK):leftMotorSetup(MK){
+		System.out.println("!!!LEFT MOTOR!!!");
+		//PrintState(MK.GetState());
+	}
+	
+	
+	
+	// Right motor setup
+	pointcut rightMotorSetup(Kicker MK):cflowbelow(playPC(MK)) && set(EV3LargeRegulatedMotor MotorController.rightMotor);
+	after(Kicker MK):rightMotorSetup(MK){
+		System.out.println("!!!RIGHT MOTOR!!!");
+		//PrintState(MK.GetState());
+	}
+	
+	
+	
+	// roboNav setup
+	pointcut roboNavSetup(Kicker MK):cflowbelow(playPC(MK)) && set(Navigator MotorController.roboNav);
+	after(Kicker MK):roboNavSetup(MK){
+		System.out.println("!!!ROBO MOTOR!!!");
+		//PrintState(MK.GetState());
+	}
+	
+	
+	
+	
+	// roboNav Motion Check -- Internal boolean for Navigator (LeJOS API)
+	//pointcut roboNavMoving(Kicker MK):cflowbelow(playPC(MK)) && set(Navigator Navigator._keepGoing);
+	//after(Kicker MK):roboNavMoving(MK){}

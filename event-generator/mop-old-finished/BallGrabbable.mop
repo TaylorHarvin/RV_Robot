@@ -1,0 +1,4 @@
+// From LTL 9 -- intended to be used with before advice
+// verify that the ball is being grabbed when within range
+// NOTE: THIS IS HANDLED IN BALLINFRONT.MOP
+// PROBABLY REDUNDANT
